@@ -387,7 +387,7 @@ fn garbage_collector_loop(lifetime: Duration) {
         .name("Garbage collector".to_owned())
         .spawn(move || loop {
             garbage_collect(lifetime);
-            sleep(Duration::from_secs(1))
+            sleep(Duration::from_secs(60 * 60))
         })
         .expect("Failed to spawn garbage collector");
 }
