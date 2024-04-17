@@ -17,7 +17,7 @@ static PATH: &str = "static";
 fn main() {
     const MAX_THREADS: usize = 32;
     const ADDRESS: SocketAddrV4 = SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), 80);
-    const FILE_LIFETIME: Duration = Duration::from_secs(60 * 60); // 24 Hours
+    const FILE_LIFETIME: Duration = Duration::from_secs(60 * 60); // 1 Hours
 
     garbage_collector_loop(FILE_LIFETIME);
     let server_thread = thread::Builder::new()
