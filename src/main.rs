@@ -92,13 +92,17 @@ fn handle_connection(thread_counter: Arc<()>, client: TcpStream, address: Socket
                         }
                     }
                 } else {
+                    log!("No method provided");
                     let _ = packet.respond_string("HTTP/1.1 400 Bad Request\r\n\r\nUnknown request method. Allowed methods: \"GET\", \"PUT\", \"DELETE\".\r\n");
                 }
             }
             proto => {
-                log!("Client used invalid protocol: \"{proto}\"")
+                log!("Client used invalid protocol: \"{proto}\"");
+                let _ = packet.respond_string("Unknown protocol.");
             }
         }
+    } else {
+        log!("Client provided no protocol.");
     }
 
     drop(thread_counter); // Decrements the counter
