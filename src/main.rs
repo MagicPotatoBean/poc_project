@@ -20,6 +20,15 @@ fn main() {
     const ADDRESS: SocketAddrV4 = SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), 80);
     const FILE_LIFETIME: Duration = Duration::from_secs(60 * 60); // 1 Hours
 
+    if let Some(arg) = std::env::args().skip(1).next() {
+        if arg == "gc" {
+            log!("Garbage collector enabled");
+        } else {
+            log!("Garbage collector disabled, use \"gc\" argument to enable it.")
+        }
+    } else {
+        log!("Garbage collector disabled, use \"gc\" argument to enable it.")
+    }
     garbage_collector_loop(FILE_LIFETIME);
     let server_thread = thread::Builder::new()
         .name("ServerThread".to_owned())
