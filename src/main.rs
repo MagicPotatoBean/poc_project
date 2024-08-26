@@ -1,20 +1,36 @@
 use crate::{
-    http_methods::{delete, get, put},
+    http_methods::{get, put},
     http_request::HttpRequest,
 };
 use std::{
+    cell::LazyCell,
     ffi::OsStr,
     io::Write,
     net::{Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener, TcpStream},
     os::unix::ffi::OsStrExt,
-    sync::Arc,
+    path::PathBuf,
+    sync::{Arc, LazyLock},
     thread::{self, sleep},
     time::Duration,
 };
 
 mod http_methods;
 mod http_request;
-static PATH: &str = "./";
+static ROOT_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    PathBuf::from("./")
+        .canonicalize()
+        .expect("Missing \"./\" directory")
+});
+static SITE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    PathBuf::from("./site")
+        .canonicalize()
+        .expect("Missing \"site\" directory")
+});
+static FILES_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    PathBuf::from("./files")
+        .canonicalize()
+        .expect("Missing \"files\" directory")
+});
 fn main() {
     const MAX_THREADS: usize = 32;
     const ADDRESS: SocketAddrV4 = SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), 80);
@@ -94,9 +110,8 @@ fn handle_connection(thread_counter: Arc<()>, client: TcpStream, address: Socket
                         log!("Client made a {method} request");
                     }
                     match method.to_lowercase().trim() {
-                        "get" => get(packet, address, PATH),
-                        "put" => put(packet, address, PATH),
-                        "delete" => delete(packet, PATH),
+                        "get" => get(packet, address),
+                        "put" => put(packet, address),
                         _ => {
                             log!("Invalid method, request ignored.");
                             let _ = packet.respond_string("HTTP/1.1 405 Method Not Allowed\r\n\r\nUnknown request method. Allowed methods: \"GET\", \"PUT\", \"DELETE\".\r\n");
@@ -120,7 +135,7 @@ fn handle_connection(thread_counter: Arc<()>, client: TcpStream, address: Socket
 }
 
 fn garbage_collect(lifetime: Duration) {
-    if let Ok(dir) = std::fs::read_dir("./files") {
+    if let Ok(dir) = std::fs::read_dir(FILES_PATH.as_path()) {
         for file in dir.flatten() {
             if file.file_name() == OsStr::from_bytes(b"static") {
                 continue;
