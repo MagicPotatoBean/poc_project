@@ -56,12 +56,11 @@ pub fn put(mut packet: HttpRequest, address: SocketAddr, path: &'static str) {
                         .write(true)
                         .open(&file_location)
                     {
-                        // Read byte-by-byte from client and send to file.
                         loop {
-                            let mut byte = [0u8];
-                            match packet.body_stream().read(&mut byte) {
-                                Ok(_) => {
-                                    if file.write(&byte).is_err() {
+                            let mut buf = [0u8; 1000];
+                            match packet.body_stream().read(&mut buf) {
+                                Ok(bytes_read) => {
+                                    if file.write(&buf[0..bytes_read]).is_err() {
                                         log!(
                                             "Failed to write byte to file \"{}\"",
                                             file_location.display()
@@ -183,15 +182,14 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr, path: &'static str) {
             } else {
                 if let Ok(mut file) = std::fs::OpenOptions::new().read(true).open(file_location) {
                     let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n\r\n"); // Send header so client is ready to receive file
-                                                                              // Read file byte-by-byte, sending each byte to the client.
                     loop {
-                        let mut byte = [0u8];
-                        match file.read(&mut byte) {
+                        let mut buf = [0u8; 1000];
+                        match file.read(&mut buf) {
                             Ok(num) => {
                                 if num == 0 {
                                     break;
                                 }
-                                packet.respond_data(&byte).unwrap();
+                                packet.respond_data(&buf[0..num]).unwrap();
                             }
                             Err(err) => match err.kind() {
                                 io::ErrorKind::UnexpectedEof | io::ErrorKind::Interrupted => {}
@@ -242,3 +240,4 @@ pub fn delete(mut packet: HttpRequest, path: &'static str) {
     packet.read_all();
     log!("{packet}\n");
 }
+
