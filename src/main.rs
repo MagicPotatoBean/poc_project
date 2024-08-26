@@ -14,7 +14,7 @@ use std::{
 
 mod http_methods;
 mod http_request;
-static PATH: &str = "static";
+static PATH: &str = "./";
 fn main() {
     const MAX_THREADS: usize = 32;
     const ADDRESS: SocketAddrV4 = SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), 80);
@@ -120,7 +120,7 @@ fn handle_connection(thread_counter: Arc<()>, client: TcpStream, address: Socket
 }
 
 fn garbage_collect(lifetime: Duration) {
-    if let Ok(dir) = std::fs::read_dir(PATH) {
+    if let Ok(dir) = std::fs::read_dir("./files") {
         for file in dir.flatten() {
             if file.file_name() == OsStr::from_bytes(b"static") {
                 continue;

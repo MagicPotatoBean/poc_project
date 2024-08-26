@@ -57,7 +57,7 @@ pub fn put(mut packet: HttpRequest, address: SocketAddr, path: &'static str) {
                         .open(&file_location)
                     {
                         loop {
-                            let mut buf = [0u8; 1000];
+                            let mut buf = [0u8; 1024];
                             match packet.body_stream().read(&mut buf) {
                                 Ok(bytes_read) => {
                                     if file.write(&buf[0..bytes_read]).is_err() {
@@ -87,7 +87,7 @@ pub fn put(mut packet: HttpRequest, address: SocketAddr, path: &'static str) {
                         }
                         if packet
                             .respond_string(&format!(
-                                "HTTP/1.1 200 Ok\r\n\r\nhttp://{}/{}/{}\r\n",
+                                "HTTP/1.1 200 Ok\r\n\r\nhttp://{}/files/{}/{}\r\n",
                                 addr, dir, name
                             ))
                             .is_err()
@@ -176,14 +176,17 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr, path: &'static str) {
             log!("Request rejected: \"{path}/{name}\"");
             packet.respond_string( "HTTP/1.1 403 Forbidden\r\n\r\nFile names cannot include \"..\", \"~\", \"*\" or start with \"/\" or \"\\\"\r\n").unwrap();
         } else {
-            if name == "" || name == "styles.css" || name == "script.js" || name == "favicon.ico" {
-                log!("Requesting main page \"{name}\"");
-                web_page(name, &mut packet, address);
-            } else {
-                if let Ok(mut file) = std::fs::OpenOptions::new().read(true).open(file_location) {
+            if name.starts_with("files/")
+                && !name[6..].starts_with("/")
+                && !name[6..].starts_with("\\")
+            {
+                if let Ok(mut file) = std::fs::OpenOptions::new()
+                    .read(true)
+                    .open(PathBuf::from(path).join(&name[6..]))
+                {
                     let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n\r\n"); // Send header so client is ready to receive file
                     loop {
-                        let mut buf = [0u8; 1000];
+                        let mut buf = [0u8; 1024];
                         match file.read(&mut buf) {
                             Ok(num) => {
                                 if num == 0 {
@@ -200,6 +203,16 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr, path: &'static str) {
                 } else {
                     packet.respond_string( &format!("HTTP/1.1 410 Gone\r\n\r\nFailed to fetch \"{name}\", this is likely because it doesn't exist.\r\n")).unwrap();
                     log!("Client requested non-existent file \"{name}\"");
+                }
+            } else {
+                if name == ""
+                    || name == "styles.css"
+                    || name == "script.js"
+                    || name == "favicon.ico"
+                {
+                    log!("Requesting main page \"{name}\"");
+                    web_page(name, &mut packet, address);
+                } else {
                 }
             }
         }
@@ -240,4 +253,3 @@ pub fn delete(mut packet: HttpRequest, path: &'static str) {
     packet.read_all();
     log!("{packet}\n");
 }
-
