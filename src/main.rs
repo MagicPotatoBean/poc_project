@@ -67,6 +67,7 @@ fn host_server(address: SocketAddr, max_threads: usize) -> std::io::Result<()> {
                 log!("Failed to spawn thread");
             }
         }
+        sleep(Duration::from_millis(250))
     }
 
     drop(thread_count);
