@@ -177,9 +177,10 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr, path: &'static str) {
             packet.respond_string( "HTTP/1.1 403 Forbidden\r\n\r\nFile names cannot include \"..\", \"~\", \"*\" or start with \"/\" or \"\\\"\r\n").unwrap();
         } else {
             if name.starts_with("files/")
-                && !name[6..].starts_with("/")
-                && !name[6..].starts_with("\\")
+                && !name[7..].starts_with("/")
+                && !name[7..].starts_with("\\")
             {
+                log!("Attempting to open {}", &name[7..]);
                 if let Ok(mut file) = std::fs::OpenOptions::new()
                     .read(true)
                     .open(PathBuf::from(path).join(&name[6..]))
