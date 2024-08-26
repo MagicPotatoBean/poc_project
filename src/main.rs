@@ -3,6 +3,7 @@ use crate::{
     http_request::HttpRequest,
 };
 use std::{
+    ffi::OsStr,
     io::Write,
     net::{Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener, TcpStream},
     os::unix::ffi::OsStrExt,
@@ -111,47 +112,51 @@ fn handle_connection(thread_counter: Arc<()>, client: TcpStream, address: Socket
 fn garbage_collect(lifetime: Duration) {
     if let Ok(dir) = std::fs::read_dir(PATH) {
         for file in dir.flatten() {
-            if let Ok(metadata) = file.metadata() {
-                if let Ok(create_date) = metadata.created() {
-                    if let Ok(elapsed) = create_date.elapsed() {
-                        if elapsed > lifetime {
-                            log!(
-                                "Attempting garbage collection of \"{}\"",
-                                String::from_utf8_lossy(file.file_name().as_bytes())
-                            );
-                            match std::fs::remove_dir_all(file.path()) {
-                                Ok(()) => {
-                                    log!(
-                                        "Successfully deleted \"{}\"",
-                                        String::from_utf8_lossy(file.file_name().as_bytes())
-                                    );
-                                }
-                                Err(err) => {
-                                    log!(
-                                        "Failed to delete \"{}\": {}",
-                                        String::from_utf8_lossy(file.file_name().as_bytes()),
-                                        err
-                                    );
+            if file.file_name() == OsStr::from_bytes(b"static") {
+                continue;
+            } else {
+                if let Ok(metadata) = file.metadata() {
+                    if let Ok(create_date) = metadata.created() {
+                        if let Ok(elapsed) = create_date.elapsed() {
+                            if elapsed > lifetime {
+                                log!(
+                                    "Attempting garbage collection of \"{}\"",
+                                    String::from_utf8_lossy(file.file_name().as_bytes())
+                                );
+                                match std::fs::remove_dir_all(file.path()) {
+                                    Ok(()) => {
+                                        log!(
+                                            "Successfully deleted \"{}\"",
+                                            String::from_utf8_lossy(file.file_name().as_bytes())
+                                        );
+                                    }
+                                    Err(err) => {
+                                        log!(
+                                            "Failed to delete \"{}\": {}",
+                                            String::from_utf8_lossy(file.file_name().as_bytes()),
+                                            err
+                                        );
+                                    }
                                 }
                             }
+                        } else {
+                            log!(
+                                "Failed to get time since creation of \"{}\"",
+                                String::from_utf8_lossy(file.file_name().as_bytes())
+                            )
                         }
                     } else {
                         log!(
-                            "Failed to get time since creation of \"{}\"",
+                            "Failed to get creation date of \"{}\"",
                             String::from_utf8_lossy(file.file_name().as_bytes())
                         )
                     }
                 } else {
                     log!(
-                        "Failed to get creation date of \"{}\"",
+                        "Failed to get metadata of \"{}\"",
                         String::from_utf8_lossy(file.file_name().as_bytes())
-                    )
+                    );
                 }
-            } else {
-                log!(
-                    "Failed to get metadata of \"{}\"",
-                    String::from_utf8_lossy(file.file_name().as_bytes())
-                );
             }
         }
     }
