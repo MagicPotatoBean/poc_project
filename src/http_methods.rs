@@ -156,12 +156,18 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
             PathBuf::from(ROOT_PATH.as_path())
                 .join(name)
                 .canonicalize()
-                .expect(&format!("Client requested non-existent file {}", name))
+                .expect(&format!(
+                    "Client requested non-existent file {}",
+                    PathBuf::from(ROOT_PATH.as_path()).join(name).display()
+                ))
         } else {
             PathBuf::from(SITE_PATH.as_path())
                 .join(name)
                 .canonicalize()
-                .expect(&format!("Client requested non-existent file {}", name))
+                .expect(&format!(
+                    "Client requested non-existent file {}",
+                    PathBuf::from(SITE_PATH.as_path()).join(name).display()
+                ))
         };
 
         log!("Attempting to open {}", &name);

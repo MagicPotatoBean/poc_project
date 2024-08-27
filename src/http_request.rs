@@ -1,4 +1,10 @@
-use std::{fmt::Display, net::TcpStream, collections::HashMap, time::Duration, io::{Read, Write}};
+use std::{
+    collections::HashMap,
+    fmt::Display,
+    io::{Read, Write},
+    net::TcpStream,
+    time::Duration,
+};
 
 enum PacketSeparatorState {
     None,
@@ -58,6 +64,9 @@ pub struct HttpRequest {
 }
 impl HttpRequest {
     pub fn new(client: TcpStream) -> Self {
+        client
+            .set_read_timeout(Some(Duration::from_millis(50)))
+            .expect("Failed to set stream timeout");
         Self {
             method_line: None,
             headers: None,
@@ -254,3 +263,4 @@ impl Display for HttpRequest {
         Ok(())
     }
 }
+

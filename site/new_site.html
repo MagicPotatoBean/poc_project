@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TITLE TEXT</title>
+        <link href='https://fonts.googleapis.com/css?family=JetBrains Mono' rel='stylesheet'>
+        <style>
+            body {
+                text-align: center;
+                background-color: #1B1A21;
+                color: white;
+                font-family: 'JetBrains Mono';
+                font-size: 22px;
+            }
+            div {margin:auto;width:50%;text-align:center}
+            h1 {margin:auto;max-width: 800px;}
+            h2 {margin:auto;max-width: 600px;}
+            p {margin:auto;max-width: 700px;}
+            code {margin:auto;max-width: 700px;word-break:break-all}
+            div:has(code) {
+                max-width: 700px;
+                font-size: 15px;
+                background-color: #23222B;
+                border: 1px solid black;
+                border-radius: 5px;
+                text-align: left;
+            }
+        </style>
+    </head>
+    <body>
+        <div><h1>FTP Server</h1></div>
+        <div><p>Paragraph, this is the thing im writing and its got a fixed width! And its a SUUUUPER long sentence, arguably one that should be line-wrapped!</p></div>
+        <div><h2>Chapter two</h2></div>
+        <div><p>Paragraph, this is the thing im writing and its got a fixed width! And its a SUUUUPER long sentence, arguably one that should be line-wrapped!</p></div>
+        <div><code>fn main() !void {<br>&nbsp;&nbsp;&nbsp;&nbsp;std.debug.print("wasd", .{})<br>}</code></div>
+    </body>
+</html>

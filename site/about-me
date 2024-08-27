@@ -29,10 +29,10 @@
         </div> 
 	</div>
     <div id="tab-bar">
-	    <div id="main-tab" class="selected-tab-box">
+	    <div id="main-tab" class="unselected-tab-box">
             <p class="tab-text jetbrains-mono-std"><a href="/" class="invisible-link">Home   &#10006</a></p>
         </div>
-	    <div id="about-me-tab" class="unselected-tab-box">
+	    <div id="about-me-tab" class="selected-tab-box">
             <p class="tab-text jetbrains-mono-std"><a href="/about-me" class="invisible-link">About me   &#10006</a></p>
         </div>
     </div>
@@ -40,25 +40,13 @@
             <tr>
                 <td class="page-line-number jetbrains-mono-std">1</td>
                 <td>
-                    <p class="jetbrains-mono-bold page-text md-headers"># Welcome to Leo Soutter's portfolio</p>
+                    <p class="jetbrains-mono-bold page-text md-headers"># About me</p>
                 </td>
             </tr>
             <tr>
                 <td class="page-line-number jetbrains-mono-std">2</td>
                 <td>
-                    <p class="jetbrains-mono-bold page-text md-headers">## Previous projects</p>
-                </td>
-            </tr>
-            <tr>
-                <td class="page-line-number jetbrains-mono-std">3</td>
-                <td>
-                    <p class="jetbrains-mono-std page-text"> <span class="md-dash">-</span> <span class="md-brackets">[</span><span class="md-link-text">The HTTP server hosting this site</span><span class="md-brackets">](</span><a class="md-link-body" href="/projects/http_server"><span class="site"></span>/projects/http_server</a><span class="md-brackets">)</span></p>
-                </td>
-            </tr>
-            <tr>
-                <td class="page-line-number jetbrains-mono-std">4</td>
-                <td>
-                    <p class="jetbrains-mono-std page-text"> <span class="md-dash">-</span> <span class="md-brackets">[</span><span class="md-link-text">A combined FTP and HTTP free hosting server</span><span class="md-brackets">](</span><a class="md-link-body" href="/projects/ftp_server"><span class="site"></span>/projects/ftp_server</a><span class="md-brackets">)</span></p>
+                    <p class="jetbrains-mono-std page-text">Todo.</p>
                 </td>
             </tr>
         </table>
