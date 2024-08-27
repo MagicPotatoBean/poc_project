@@ -71,7 +71,6 @@ pub fn put(mut packet: HttpRequest, address: SocketAddr) {
                                     }
                                 }
                                 Err(err) => match err.kind() {
-                                    io::ErrorKind::Interrupted => log!("Interrupted"),
                                     io::ErrorKind::WouldBlock => break,
                                     err => {
                                         log!("Stopped writing to file: \"{err}\"");
@@ -183,8 +182,11 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
                         packet.respond_data(&buf[0..num]).unwrap();
                     }
                     Err(err) => match err.kind() {
-                        io::ErrorKind::UnexpectedEof | io::ErrorKind::Interrupted => {}
-                        _ => break, // When reached end of file, break.
+                        io::ErrorKind::WouldBlock => break,
+                        err => {
+                            log!("Stopped writing to file: \"{err}\"");
+                            break;
+                        }
                     },
                 }
             }
