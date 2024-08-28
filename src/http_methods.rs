@@ -171,7 +171,12 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
 
         log!("Attempting to open {}", &name);
         if let Ok(mut file) = std::fs::OpenOptions::new().read(true).open(file_location) {
-            let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n\r\n"); // Send header so client is ready to receive file
+            let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n"); // Send header so client is ready to receive file
+            let _ = packet.respond_string(&format!(
+                "Content-length: {}\r\n",
+                file.metadata().unwrap().len()
+            ));
+            let _ = packet.respond_string("\r\n");
             loop {
                 let mut buf = [0u8; 1024];
                 match file.read(&mut buf) {
