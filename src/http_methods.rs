@@ -63,6 +63,9 @@ pub fn put(mut packet: HttpRequest, address: SocketAddr) {
                             let mut buf = [0u8; 1024];
                             match packet.body_stream().read(&mut buf) {
                                 Ok(bytes_read) => {
+                                    if bytes_read == 0 {
+                                        break;
+                                    }
                                     if file.write(&buf[0..bytes_read]).is_err() {
                                         log!(
                                             "Failed to write byte to file \"{}\"",
