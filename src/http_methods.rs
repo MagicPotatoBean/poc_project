@@ -74,7 +74,7 @@ pub fn put(mut packet: HttpRequest, address: SocketAddr) {
                                     io::ErrorKind::WouldBlock => break,
                                     err => {
                                         log!("Stopped writing to file: \"{err}\"");
-                                        break;
+                                        return;
                                     }
                                 },
                             }

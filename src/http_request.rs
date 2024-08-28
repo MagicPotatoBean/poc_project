@@ -6,6 +6,8 @@ use std::{
     time::Duration,
 };
 
+use crate::log;
+
 enum PacketSeparatorState {
     None,
     FirstReturn,
@@ -171,11 +173,21 @@ impl HttpRequest {
                     .expect("Should set read timeout");
                 loop {
                     let mut byte = [0u8];
-                    let _ = self.stream.read(&mut byte);
-                    header_data.push(byte[0]);
-                    state = state.step(&byte[0]);
-                    if state.is_done() {
-                        break;
+                    match self.stream.read(&mut byte) {
+                        Ok(bytes_read) => {
+                            if bytes_read == 0 {
+                                return None;
+                            }
+                            header_data.push(byte[0]);
+                            state = state.step(&byte[0]);
+                            if state.is_done() {
+                                break;
+                            }
+                        }
+                        Err(err) => {
+                            log!("encountered an error: {}", err);
+                            return None;
+                        }
                     }
                 }
                 if let Ok(str_headers) = String::from_utf8(header_data) {
@@ -263,4 +275,3 @@ impl Display for HttpRequest {
         Ok(())
     }
 }
-
