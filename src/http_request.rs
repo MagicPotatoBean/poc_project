@@ -66,9 +66,6 @@ pub struct HttpRequest {
 }
 impl HttpRequest {
     pub fn new(client: TcpStream) -> Self {
-        client
-            .set_read_timeout(Some(Duration::from_millis(50)))
-            .expect("Failed to set stream timeout");
         Self {
             method_line: None,
             headers: None,
@@ -168,9 +165,6 @@ impl HttpRequest {
             None => {
                 let mut header_data: Vec<u8> = Vec::new();
                 let mut state = PacketSeparatorState::None;
-                self.stream
-                    .set_read_timeout(Some(Duration::from_millis(100)))
-                    .expect("Should set read timeout");
                 loop {
                     let mut byte = [0u8];
                     match self.stream.read(&mut byte) {

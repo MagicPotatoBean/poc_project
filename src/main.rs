@@ -97,10 +97,10 @@ fn handle_connection(thread_counter: Arc<()>, client: TcpStream, address: Socket
     );
     let client_ip = client.peer_addr();
     client
-        .set_read_timeout(Some(Duration::from_millis(50)))
+        .set_read_timeout(Some(Duration::from_millis(250)))
         .expect("Should set read timeout");
     client
-        .set_write_timeout(Some(Duration::from_millis(50)))
+        .set_write_timeout(Some(Duration::from_millis(250)))
         .expect("Should set write timeout");
     log!("Set read timeout");
     let mut packet = HttpRequest::new(client);
