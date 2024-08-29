@@ -157,10 +157,6 @@ impl HttpRequest {
                             return None;
                         }
                     }
-                    if self.stream.read(&mut byte).is_ok() {
-                    } else {
-                        break;
-                    }
                 }
                 self.method_line = String::from_utf8(bytes).ok();
                 self.protocol()
