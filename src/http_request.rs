@@ -138,15 +138,26 @@ impl HttpRequest {
                 let mut has_returned = false;
                 loop {
                     let mut byte = [0u8];
-                    if self.stream.read(&mut byte).is_ok() {
-                        if &byte == b"\r" {
-                            has_returned = true;
-                        } else if has_returned && &byte == b"\n" {
-                            break;
-                        } else {
-                            has_returned = false;
-                            bytes.push(byte[0]);
+                    match self.stream.read(&mut byte) {
+                        Ok(bytes_read) => {
+                            if bytes_read == 0 {
+                                return None;
+                            }
+                            if &byte == b"\r" {
+                                has_returned = true;
+                            } else if has_returned && &byte == b"\n" {
+                                break;
+                            } else {
+                                has_returned = false;
+                                bytes.push(byte[0]);
+                            }
                         }
+                        Err(err) => {
+                            log!("Stopped reading method line: {err}");
+                            return None;
+                        }
+                    }
+                    if self.stream.read(&mut byte).is_ok() {
                     } else {
                         break;
                     }
@@ -179,7 +190,7 @@ impl HttpRequest {
                             }
                         }
                         Err(err) => {
-                            log!("encountered an error: {}", err);
+                            log!("encountered an error reading headers: {}", err);
                             return None;
                         }
                     }
