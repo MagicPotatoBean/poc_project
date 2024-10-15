@@ -116,6 +116,26 @@ pub fn put(mut packet: HttpRequest, address: SocketAddr) {
     packet.read_all();
     log!("{packet}\n");
 }
+pub fn ip_page(packet: &mut HttpRequest, address: SocketAddr) {
+    let no_html;
+    if let Some(headers) = packet.headers() {
+        if let Some(user_agent) = headers.get("Accept") {
+            no_html = !user_agent.contains("text/html");
+        } else {
+            no_html = true; // Assumes this is a basic custom TUI
+        }
+    } else {
+        no_html = true; // Assumes this is a basic custom TUI
+    }
+    if true {// Make a no_html check
+        let peer_ip = packet.body_stream().peer_addr().map(|addr| addr.ip().to_string()).unwrap_or("UNKNOWN".to_string());
+        let _ = packet.respond_string( &format!("HTTP/1.1 200 Ok\r\n\r\n{}", peer_ip));
+    } else {
+        //let _ = packet.respond_string("HTTP/1.1 200 OK\r\n\r\n");
+        //let _ =
+        //    packet.respond_data(&std::fs::read("site/files.html").expect("Missing files page."));
+    }
+}
 pub fn files_page(packet: &mut HttpRequest, address: SocketAddr) {
     let no_html;
     if let Some(headers) = packet.headers() {
@@ -150,6 +170,9 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
             name = "/index.html".to_owned();
         } else if name == "/files" {
             files_page(&mut packet, address);
+            return;
+        } else if name == "/ip".to_owned() {
+            ip_page(&mut packet, address);
             return;
         }
         let name = &name[1..];
