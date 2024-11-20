@@ -27,9 +27,10 @@ static SITE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
         .expect("Missing \"site\" directory")
 });
 static FILES_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
-    PathBuf::from("./files")
-        .canonicalize()
-        .expect("Missing \"files\" directory")
+    PathBuf::from("./files").canonicalize().expect(&format!(
+        "Missing \"files\" directory, in {}",
+        std::env::current_dir().unwrap().display()
+    ))
 });
 fn main() {
     const MAX_THREADS: usize = 32;
@@ -205,11 +206,11 @@ macro_rules! log {
     () => {
         let current_time: DateTime<Utc> = Utc::now();
         std::fs::OpenOptions::new().append(true).create(true).open("err.log").expect("Failed to open log file").write_all(format!("[{} UTC] {}:{}:{}\n", current_time.format("%Y-%m-%d %H:%M:%S"), file!(), line!(), column!()).as_bytes()).expect("Failed to write to log file");
-        println!("[{} UTC] {}:{}:{}", current_time.format("%Y-%m-%d %H:%M:%S"), file!(), line!(), column!());
+        eprintln!("[{} UTC] {}:{}:{}", current_time.format("%Y-%m-%d %H:%M:%S"), file!(), line!(), column!());
     };
     ($($arg:tt)*) => {{
         let current_time: chrono::DateTime<chrono::Utc> = chrono::Utc::now();
         std::fs::OpenOptions::new().append(true).create(true).open("err.log").expect("Failed to open log file").write_all(format!("[{} UTC] {}:{}:{}: {}\n", current_time.format("%Y-%m-%d %H:%M:%S"), file!(), line!(), column!(), format!($($arg)*)).as_bytes()).expect("Failed to write to log file");
-        println!("[{} UTC] {}:{}:{}: {}", current_time.format("%Y-%m-%d %H:%M:%S"), file!(), line!(), column!(), format!($($arg)*));
+        eprintln!("[{} UTC] {}:{}:{}: {}", current_time.format("%Y-%m-%d %H:%M:%S"), file!(), line!(), column!(), format!($($arg)*));
     }};
 }
