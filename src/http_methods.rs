@@ -210,7 +210,9 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
                         PathBuf::from(SITE_PATH.as_path()).join(name).display()
                     ))
             };
-            if !file_location.starts_with(ROOT_PATH.clone()) {
+            if !file_location.starts_with(ROOT_PATH.clone())
+                && !file_location.starts_with(SITE_PATH.clone())
+            {
                 panic!("User attempted path traversal");
             }
 
