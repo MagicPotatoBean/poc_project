@@ -172,7 +172,9 @@ pub fn files_page(packet: &mut HttpRequest, address: SocketAddr) {
 // Reads the requested path, and if it matches a file on the server, returns the file in the body
 pub fn get(mut packet: HttpRequest, address: SocketAddr) {
     let host = packet.headers().unwrap().get("Host").unwrap();
+    log!("Requesting from {host}");
     if host == "zoe.soutter.com" {
+        log!("Requesting from Personal site");
         if let Some(mut name) = packet.path() {
             if name == "" || name == "/" {
                 name = "/index.html".to_owned();
