@@ -95,13 +95,18 @@ pub fn put(mut packet: HttpRequest, address: SocketAddr) {
                                 addr.push_str(&address.port().to_string());
                             }
                         }
-                        if packet
-                            .respond_string(&format!(
+                        let stored_path = if host == "zoe.soutter.com" {
+                            format!(
                                 "HTTP/1.1 200 Ok\r\n\r\nhttp://{}/files/{}/{}\r\n",
                                 addr, dir, name
-                            ))
-                            .is_err()
-                        {
+                            )
+                        } else {
+                            format!(
+                                "HTTP/1.1 200 Ok\r\n\r\nhttp://{}/{}/{}\r\n",
+                                addr, dir, name
+                            )
+                        };
+                        if packet.respond_string(&stored_path).is_err() {
                             log!(
                                 "Failed to send user path to access file \"{}\"",
                                 file_location.display()
