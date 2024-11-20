@@ -1,3 +1,4 @@
+use core::panic;
 use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
@@ -127,9 +128,14 @@ pub fn ip_page(packet: &mut HttpRequest, address: SocketAddr) {
     } else {
         no_html = true; // Assumes this is a basic custom TUI
     }
-    if true {// Make a no_html check
-        let peer_ip = packet.body_stream().peer_addr().map(|addr| addr.ip().to_string()).unwrap_or("UNKNOWN".to_string());
-        let _ = packet.respond_string( &format!("HTTP/1.1 200 Ok\r\n\r\n{}", peer_ip));
+    if true {
+        // Make a no_html check
+        let peer_ip = packet
+            .body_stream()
+            .peer_addr()
+            .map(|addr| addr.ip().to_string())
+            .unwrap_or("UNKNOWN".to_string());
+        let _ = packet.respond_string(&format!("HTTP/1.1 200 Ok\r\n\r\n{}", peer_ip));
     } else {
         //let _ = packet.respond_string("HTTP/1.1 200 OK\r\n\r\n");
         //let _ =
@@ -165,67 +171,127 @@ pub fn files_page(packet: &mut HttpRequest, address: SocketAddr) {
 }
 // Reads the requested path, and if it matches a file on the server, returns the file in the body
 pub fn get(mut packet: HttpRequest, address: SocketAddr) {
-    if let Some(mut name) = packet.path() {
-        if name == "" || name == "/" {
-            name = "/index.html".to_owned();
-        } else if name == "/files" {
-            files_page(&mut packet, address);
-            return;
-        } else if name == "/ip".to_owned() {
-            ip_page(&mut packet, address);
-            return;
-        }
-        let name = &name[1..];
-
-        let file_location = if name.starts_with("files/") {
-            PathBuf::from(ROOT_PATH.as_path())
-                .join(name)
-                .canonicalize()
-                .expect(&format!(
-                    "Client requested non-existent file {}",
-                    PathBuf::from(ROOT_PATH.as_path()).join(name).display()
-                ))
-        } else {
-            PathBuf::from(SITE_PATH.as_path())
-                .join(name)
-                .canonicalize()
-                .expect(&format!(
-                    "Client requested non-existent file {}",
-                    PathBuf::from(SITE_PATH.as_path()).join(name).display()
-                ))
-        };
-
-        log!("Attempting to open {}", &name);
-        if let Ok(mut file) = std::fs::OpenOptions::new().read(true).open(file_location) {
-            let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n"); // Send header so client is ready to receive file
-            let _ = packet.respond_string(&format!(
-                "Content-length: {}\r\n",
-                file.metadata().unwrap().len()
-            ));
-            let _ = packet.respond_string("\r\n");
-            loop {
-                let mut buf = [0u8; 1024];
-                match file.read(&mut buf) {
-                    Ok(num) => {
-                        if num == 0 {
-                            break;
-                        }
-                        packet.respond_data(&buf[0..num]).unwrap();
-                    }
-                    Err(err) => match err.kind() {
-                        io::ErrorKind::WouldBlock => break,
-                        err => {
-                            log!("Stopped writing to file: \"{err}\"");
-                            break;
-                        }
-                    },
-                }
+    let host = packet.headers().unwrap().get("Host").unwrap();
+    if host == "zoe.soutter.com" {
+        if let Some(mut name) = packet.path() {
+            if name == "" || name == "/" {
+                name = "/index.html".to_owned();
+            } else if name == "/files" {
+                files_page(&mut packet, address);
+                return;
+            } else if name == "/ip".to_owned() {
+                ip_page(&mut packet, address);
+                return;
             }
-        } else {
-            packet.respond_string( &format!("HTTP/1.1 410 Gone\r\n\r\nFailed to fetch \"{name}\", this is likely because it doesn't exist.\r\n")).unwrap();
-            log!("Client requested non-existent file \"{name}\"");
+            let name = &name[1..];
+
+            let file_location = if name.starts_with("files/") {
+                PathBuf::from(ROOT_PATH.as_path())
+                    .join(name)
+                    .canonicalize()
+                    .expect(&format!(
+                        "Client requested non-existent file {}",
+                        PathBuf::from(ROOT_PATH.as_path()).join(name).display()
+                    ))
+            } else {
+                PathBuf::from(SITE_PATH.as_path())
+                    .join(name)
+                    .canonicalize()
+                    .expect(&format!(
+                        "Client requested non-existent file {}",
+                        PathBuf::from(SITE_PATH.as_path()).join(name).display()
+                    ))
+            };
+            if !file_location.starts_with(ROOT_PATH.clone()) {
+                panic!("User attempted path traversal");
+            }
+
+            log!("Attempting to open {}", &name);
+            if let Ok(mut file) = std::fs::OpenOptions::new().read(true).open(file_location) {
+                let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n"); // Send header so client is ready to receive file
+                let _ = packet.respond_string(&format!(
+                    "Content-length: {}\r\n",
+                    file.metadata().unwrap().len()
+                ));
+                let _ = packet.respond_string("\r\n");
+                loop {
+                    let mut buf = [0u8; 1024];
+                    match file.read(&mut buf) {
+                        Ok(num) => {
+                            if num == 0 {
+                                break;
+                            }
+                            packet.respond_data(&buf[0..num]).unwrap();
+                        }
+                        Err(err) => match err.kind() {
+                            io::ErrorKind::WouldBlock => break,
+                            err => {
+                                log!("Stopped writing to file: \"{err}\"");
+                                break;
+                            }
+                        },
+                    }
+                }
+            } else {
+                packet.respond_string( &format!("HTTP/1.1 410 Gone\r\n\r\nFailed to fetch \"{name}\", this is likely because it doesn't exist.\r\n")).unwrap();
+                log!("Client requested non-existent file \"{name}\"");
+            }
         }
+        packet.read_all();
+        log!("{packet}\n");
+    } else {
+        if let Some(name) = packet.path() {
+            let file_location = if name == "" || name == "/" {
+                "files.html".into()
+            } else {
+                let name = &name[1..];
+
+                let file_location = PathBuf::from(ROOT_PATH.as_path())
+                    .join("files")
+                    .join(name)
+                    .canonicalize()
+                    .expect(&format!(
+                        "Client requested non-existent file {}",
+                        PathBuf::from(ROOT_PATH.as_path()).join(name).display()
+                    ));
+                if !file_location.starts_with(ROOT_PATH.join("files/")) {
+                    panic!("User attempted path traversal");
+                }
+                file_location
+            };
+
+            log!("Attempting to open {}", &name);
+            if let Ok(mut file) = std::fs::OpenOptions::new().read(true).open(file_location) {
+                let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n"); // Send header so client is ready to receive file
+                let _ = packet.respond_string(&format!(
+                    "Content-length: {}\r\n",
+                    file.metadata().unwrap().len()
+                ));
+                let _ = packet.respond_string("\r\n");
+                loop {
+                    let mut buf = [0u8; 1024];
+                    match file.read(&mut buf) {
+                        Ok(num) => {
+                            if num == 0 {
+                                break;
+                            }
+                            packet.respond_data(&buf[0..num]).unwrap();
+                        }
+                        Err(err) => match err.kind() {
+                            io::ErrorKind::WouldBlock => break,
+                            err => {
+                                log!("Stopped writing to file: \"{err}\"");
+                                break;
+                            }
+                        },
+                    }
+                }
+            } else {
+                packet.respond_string( &format!("HTTP/1.1 410 Gone\r\n\r\nFailed to fetch \"{name}\", this is likely because it doesn't exist.\r\n")).unwrap();
+                log!("Client requested non-existent file \"{name}\"");
+            }
+        }
+        packet.read_all();
+        log!("{packet}\n");
     }
-    packet.read_all();
-    log!("{packet}\n");
 }
