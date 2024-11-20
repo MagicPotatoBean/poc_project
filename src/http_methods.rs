@@ -10,7 +10,11 @@ use std::{
 use crate::{http_request::HttpRequest, log, FILES_PATH, ROOT_PATH, SITE_PATH};
 /// Hashes the current system time, converts it to hex, makes a file with that name and stores the packet body to that file
 pub fn put(mut packet: HttpRequest, address: SocketAddr) {
-    if let Some(name) = packet.path() {
+    let host = packet.headers().unwrap().get("Host").unwrap().clone();
+    if let Some(mut name) = packet.path().clone() {
+        if host != "zoe.soutter.com" {
+            name = format!("/files{name}");
+        }
         let name = &name[1..]; // Remove leading "/"
         let mut is_100_continue = false;
         if let Some(headers) = packet.headers() {
