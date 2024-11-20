@@ -250,7 +250,7 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
     } else {
         if let Some(name) = packet.path() {
             let file_location = if name == "" || name == "/" {
-                "files.html".into()
+                "files.txt".into()
             } else {
                 let name = &name[1..];
 
