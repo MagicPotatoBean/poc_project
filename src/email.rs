@@ -28,7 +28,7 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
     <body>",
         );
         for inbox in inboxes.flatten() {
-            println!("Inbox path = {}", inbox.path());
+            println!("Inbox path = {}", inbox.path().display());
             html.push_str(&format!(
                 "<a href=\"./email/{}\">{}<a><br>",
                 inbox
