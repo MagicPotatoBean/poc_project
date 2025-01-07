@@ -182,6 +182,7 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
     if host == "zoe.soutter.com" {
         log!("Requesting from Personal site");
         if let Some(mut name) = packet.path() {
+            println!("NAME: {}", name);
             if name == "" || name == "/" {
                 name = "/index.html".to_owned();
             } else if name == "/files" {
