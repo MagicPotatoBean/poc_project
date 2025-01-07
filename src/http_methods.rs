@@ -212,8 +212,8 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
                 for inbox in inboxes.flatten() {
                     html.push_str(&format!(
                         "<a href=\"{}\">{}<a>",
-                        inbox.path(),
-                        inbox.file_name()
+                        inbox.path().display(),
+                        inbox.file_name().into_string().unwrap()
                     ));
                 }
             }
