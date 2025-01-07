@@ -29,7 +29,8 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
                             .join(&name[1..])
                             .display()
                     )),
-            );
+            )
+            .unwrap();
             let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n\r\n"); // Send header so client is ready to receive file
             packet.respond_data(&data);
             packet.read_all();
