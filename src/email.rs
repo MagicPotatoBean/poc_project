@@ -12,11 +12,11 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
             .join(&name[1..]);
         let Ok(inboxes) = std::fs::read_dir(
             addr.canonicalize()
-                .expect(&format!("Non-existent inbox: {}", addr)),
+                .expect(&format!("Non-existent inbox: {}", addr.display())),
         ) else {
             let data = std::fs::read(
                 addr.canonicalize()
-                    .expect(&format!("Non-existent inbox: {}", addr)),
+                    .expect(&format!("Non-existent inbox: {}", addr.display())),
             )
             .unwrap();
             let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n\r\n"); // Send header so client is ready to receive file
