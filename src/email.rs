@@ -1,6 +1,6 @@
 use std::{net::SocketAddr, path::PathBuf};
 
-use crate::{http_request::HttpRequest, ROOT_PATH};
+use crate::{http_request::HttpRequest, log, ROOT_PATH};
 
 pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
     if packet.headers().unwrap().get("Authorization")
