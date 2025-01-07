@@ -216,6 +216,10 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
                         inbox.file_name().into_string().unwrap()
                     ));
                 }
+                html.push_str("</body></html>");
+                let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n\r\n"); // Send header so client is ready to receive file
+                packet.respond_string(&html);
+                return;
             }
             let name = &name[1..];
 
