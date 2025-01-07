@@ -190,6 +190,32 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
             } else if name == "/ip".to_owned() {
                 ip_page(&mut packet, address);
                 return;
+            } else if name.starts_with("/files/static/email/") {
+                let Ok(inboxes) = std::fs::read_dir(
+                    PathBuf::from(ROOT_PATH.as_path())
+                        .join(&name[1..])
+                        .canonicalize()
+                        .expect(&format!(
+                            "Non-existent inbox: {}",
+                            PathBuf::from(ROOT_PATH.as_path())
+                                .join(&name[1..])
+                                .display()
+                        )),
+                ) else {
+                    return;
+                };
+                let mut html = String::from(
+                    r"<!DOCTYPE html>
+<html>
+    <body>",
+                );
+                for inbox in inboxes.flatten() {
+                    html.push_str(&format!(
+                        "<a href=\"{}\">{}<a>",
+                        inbox.path(),
+                        inbox.file_name()
+                    ));
+                }
             }
             let name = &name[1..];
 
