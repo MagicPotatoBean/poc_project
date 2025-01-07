@@ -14,6 +14,7 @@ use std::{
     time::Duration,
 };
 
+mod email;
 mod http_methods;
 mod http_request;
 static ROOT_PATH: LazyLock<PathBuf> = LazyLock::new(|| {

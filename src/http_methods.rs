@@ -7,7 +7,7 @@ use std::{
     path::{Component, PathBuf},
 };
 
-use crate::{http_request::HttpRequest, log, FILES_PATH, ROOT_PATH, SITE_PATH};
+use crate::{email, http_request::HttpRequest, log, FILES_PATH, ROOT_PATH, SITE_PATH};
 /// Hashes the current system time, converts it to hex, makes a file with that name and stores the packet body to that file
 pub fn put(mut packet: HttpRequest, address: SocketAddr) {
     let host = packet.headers().unwrap().get("Host").unwrap().clone();
@@ -191,36 +191,7 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
                 ip_page(&mut packet, address);
                 return;
             } else if name.starts_with("/files/static/email") {
-                println!("Email requested");
-                let Ok(inboxes) = std::fs::read_dir(
-                    PathBuf::from(ROOT_PATH.as_path())
-                        .join(&name[1..])
-                        .canonicalize()
-                        .expect(&format!(
-                            "Non-existent inbox: {}",
-                            PathBuf::from(ROOT_PATH.as_path())
-                                .join(&name[1..])
-                                .display()
-                        )),
-                ) else {
-                    println!("Couldnt find email directory");
-                    return;
-                };
-                let mut html = String::from(
-                    r"<!DOCTYPE html>
-<html>
-    <body>",
-                );
-                for inbox in inboxes.flatten() {
-                    html.push_str(&format!(
-                        "<a href=\"{}\">{}<a>",
-                        inbox.path().display(),
-                        inbox.file_name().into_string().unwrap()
-                    ));
-                }
-                html.push_str("</body></html>");
-                let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n\r\n"); // Send header so client is ready to receive file
-                packet.respond_string(&html);
+                email::email(packet, address, name.clone());
                 return;
             }
             let name = &name[1..];
