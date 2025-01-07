@@ -190,7 +190,7 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
             } else if name == "/ip".to_owned() {
                 ip_page(&mut packet, address);
                 return;
-            } else if name.starts_with("/files/static/email/") {
+            } else if name.starts_with("/files/static/email") {
                 let Ok(inboxes) = std::fs::read_dir(
                     PathBuf::from(ROOT_PATH.as_path())
                         .join(&name[1..])
