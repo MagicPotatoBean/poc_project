@@ -4,7 +4,7 @@ use std::{net::SocketAddr, path::PathBuf};
 
 pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
     if packet.headers().unwrap().get("Authorization")
-        == Some(&String::from("em9lOjZEc1RYd3F1WjNoemV5N0Y="))
+        == Some(&String::from("Basic em9lOjZEc1RYd3F1WjNoemV5N0Y="))
     {
         println!("Email requested");
         let Ok(inboxes) = std::fs::read_dir(
