@@ -36,8 +36,11 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
         html.push_str("</body></html>");
         let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n\r\n"); // Send header so client is ready to receive file
         packet.respond_string(&html);
-        return;
+        packet.read_all();
+        log!("{packet}\n");
     } else {
         let _ = packet.respond_string("HTTP/1.1 401 Ok\r\nWWW-Authenticate: Basic\r\n\r\n");
+        packet.read_all();
+        log!("{packet}\n");
     }
 }
