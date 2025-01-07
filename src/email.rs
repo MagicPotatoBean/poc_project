@@ -30,7 +30,7 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
         for inbox in inboxes.flatten() {
             println!("Inbox path = {}", inbox.path().display());
             html.push_str(&format!(
-                "<a href=\"./email/{}\">{}<a><br>",
+                "<a href=\"/files/static/email/{}\">{}<a><br>",
                 inbox
                     .path()
                     .strip_prefix(PathBuf::from("/home/ubuntu/source/repos/smtp-rs/inboxes"))
