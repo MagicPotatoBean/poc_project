@@ -10,19 +10,14 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
         let addr = PathBuf::from(ROOT_PATH.as_path())
             .join("../smtp-rs/inboxes/")
             .join(&name[1..]);
-        let Ok(inboxes) = std::fs::read_dir(addr.canonicalize().expect(&format!(
-                    "Non-existent inbox: {}",
-                    PathBuf::from(ROOT_PATH.as_path())
-                        .join(&name[1..])
-                        .display()
-                )))
-        else {
-            let data = std::fs::read(addr.expect(&format!(
-                        "Non-existent inbox: {}",
-                        PathBuf::from(ROOT_PATH.as_path())
-                            .join(&name[1..])
-                            .display()
-                    )))
+        let Ok(inboxes) = std::fs::read_dir(
+            addr.canonicalize()
+                .expect(&format!("Non-existent inbox: {}", addr)),
+        ) else {
+            let data = std::fs::read(
+                addr.canonicalize()
+                    .expect(&format!("Non-existent inbox: {}", addr)),
+            )
             .unwrap();
             let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n\r\n"); // Send header so client is ready to receive file
             packet.respond_data(&data);
