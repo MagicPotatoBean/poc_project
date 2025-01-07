@@ -19,7 +19,20 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
                         .display()
                 )),
         ) else {
-            println!("Couldnt find email directory");
+            let data = std::fs::read(
+                PathBuf::from(ROOT_PATH.as_path())
+                    .join(&name[1..])
+                    .canonicalize()
+                    .expect(&format!(
+                        "Non-existent inbox: {}",
+                        PathBuf::from(ROOT_PATH.as_path())
+                            .join(&name[1..])
+                            .display()
+                    )),
+            );
+            let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n\r\n"); // Send header so client is ready to receive file
+            packet.respond_data(&data);
+            packet.read_all();
             return;
         };
         let mut html = String::from(
