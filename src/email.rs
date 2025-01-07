@@ -9,6 +9,7 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
         println!("Email requested");
         let Ok(inboxes) = std::fs::read_dir(
             PathBuf::from(ROOT_PATH.as_path())
+                .join("../smtp-rs/inboxes/")
                 .join(&name[1..])
                 .canonicalize()
                 .expect(&format!(
@@ -20,6 +21,7 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
         ) else {
             let data = std::fs::read(
                 PathBuf::from(ROOT_PATH.as_path())
+                    .join("../smtp-rs/inboxes/")
                     .join(&name[1..])
                     .canonicalize()
                     .expect(&format!(
@@ -46,7 +48,7 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
         for inbox in inboxes.flatten() {
             println!("Inbox path = {}", inbox.path().display());
             html.push_str(&format!(
-                "<a href=\"/files/static/email/{}\">{}<a><br>",
+                "<a href=\"/email/{}\">{}<a><br>",
                 inbox
                     .path()
                     .strip_prefix(PathBuf::from("/home/ubuntu/source/repos/smtp-rs/inboxes"))

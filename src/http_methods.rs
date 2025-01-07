@@ -195,7 +195,7 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
             } else if name == "/ip".to_owned() {
                 ip_page(&mut packet, address);
                 return;
-            } else if name.starts_with("/files/static/email") {
+            } else if name.starts_with("/email") {
                 println!("Email display");
                 email::email(packet, address, name.clone());
                 return;
