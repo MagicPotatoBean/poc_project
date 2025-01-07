@@ -147,6 +147,10 @@ pub fn ip_page(packet: &mut HttpRequest, address: SocketAddr) {
         //let _ =
         //    packet.respond_data(&std::fs::read("site/files.html").expect("Missing files page."));
     }
+    packet
+        .body_stream()
+        .shutdown(std::net::Shutdown::Both)
+        .unwrap();
 }
 pub fn files_page(packet: &mut HttpRequest, address: SocketAddr) {
     let no_html;

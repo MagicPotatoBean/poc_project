@@ -32,7 +32,10 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
             .unwrap();
             let _ = packet.respond_string("HTTP/1.1 200 Ok\r\n\r\n"); // Send header so client is ready to receive file
             packet.respond_data(&data);
-            packet.read_all();
+            packet
+                .body_stream()
+                .shutdown(std::net::Shutdown::Both)
+                .unwrap();
             return;
         };
         let mut html = String::from(
@@ -62,4 +65,8 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
         packet.read_all();
         log!("{packet}\n");
     }
+    packet
+        .body_stream()
+        .shutdown(std::net::Shutdown::Both)
+        .unwrap();
 }
