@@ -1,5 +1,6 @@
 use crate::{http_request::HttpRequest, log, ROOT_PATH};
 use std::io::Write;
+use std::str::FromStr;
 use std::{net::SocketAddr, path::PathBuf};
 
 pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
@@ -28,8 +29,12 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
         );
         for inbox in inboxes.flatten() {
             html.push_str(&format!(
-                "<a href=\"{}\">{}<a><br>",
-                inbox.path().display(),
+                "<a href=\"./files/static/email{}\">{}<a><br>",
+                inbox
+                    .path()
+                    .strip_prefix(PathBuf::from("/home/ubuntu/source/repos/smtp-rs/inboxes"))
+                    .unwrap()
+                    .display(),
                 inbox.file_name().into_string().unwrap()
             ));
         }
