@@ -191,6 +191,7 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
                 ip_page(&mut packet, address);
                 return;
             } else if name.starts_with("/files/static/email") {
+                println!("Email requested");
                 let Ok(inboxes) = std::fs::read_dir(
                     PathBuf::from(ROOT_PATH.as_path())
                         .join(&name[1..])
@@ -202,6 +203,7 @@ pub fn get(mut packet: HttpRequest, address: SocketAddr) {
                                 .display()
                         )),
                 ) else {
+                    println!("Couldnt find email directory");
                     return;
                 };
                 let mut html = String::from(
