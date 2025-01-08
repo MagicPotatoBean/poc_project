@@ -9,7 +9,7 @@ pub fn email(mut packet: HttpRequest, address: SocketAddr, name: String) {
         println!("Email requested");
         let addr = PathBuf::from(ROOT_PATH.as_path())
             .join("../smtp-rs/inboxes/")
-            .join(&name[7..]);
+            .join(&name.chars().skip(7).collect::<String>());
         let Ok(inboxes) = std::fs::read_dir(
             addr.canonicalize()
                 .expect(&format!("Non-existent inbox: {}", addr.display())),
